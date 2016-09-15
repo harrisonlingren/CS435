@@ -1,18 +1,19 @@
 import socket, sys
 
-def main(argv):
-    host = argv[0]
-    port = int(argv[1])
+def main(args):
+    print("Host: " + args[1])
+    host = args[1]
+    print("Port: "+ str(args[2]))
+    port = int(args[2])
 
     # message to be sent
     msg = input('Input a message to send:')
-    print(msg.encode())
+    msg = msg + "\nHTTP/1.1\nHost: " + host + "\n\n"
 
     # Create socket and send message to host
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host, port))
     s.send(msg.encode())
-
 
     # Print response
     resp = s.recv(1024).decode()
@@ -24,7 +25,9 @@ def main(argv):
 
 if __name__ == '__main__':
     # pass host, port
-    if len(sys.argv) > 1:
-        main(sys.argv[1:])
+    if len(sys.argv) >= 3:
+        main(sys.argv)
+    elif len(sys.argv) == 2:
+        main([sys.argv[0], sys.argv[1], 80])
     else:
-        main(['localhost', 8080])
+        main(['', 'localhost', 80])
