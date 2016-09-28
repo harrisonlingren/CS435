@@ -37,7 +37,7 @@ def get_response(req):
     for header,value in h.items():
         print(header + ' => ' + value)
 
-    print('\n>  Request type:  {}\n'.format(r))
+    print('>  Request type:  {}'.format(r))
 
     if r != '':
         method = r.split(' ')[0]
@@ -50,7 +50,7 @@ def get_response(req):
         path = path + 'index.html'
 
     fullpath = wwwroot + path
-    print('\n>  Requested path: ' + fullpath)
+    print('>  Requested path: ' + fullpath)
 
     if method in allowed_methods:
         try:
@@ -70,14 +70,11 @@ def get_response(req):
                 # Check for 'if-modified-since' header
                 if 'if-modified-since' in h:
                     check_date = datetime.datetime.strptime(h['if-modified-since'], req_time_format)
-                    print('>  Date to compare to: {}'.format(check_date))
 
                     # Check if file has changed
                     if ((check_date - modify_date) > datetime.timedelta(seconds=0)):
-                        print('>  Difference between times: {}'.format(check_date - modify_date))
                         code = '304 Not Modified'
                         content = ''
-                        print('It worked! Nice!')
 
                     # If not, send file
                     else:
