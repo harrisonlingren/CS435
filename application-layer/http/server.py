@@ -33,14 +33,11 @@ def get_response(req):
     h = strip_headers(req)
     date = datetime.datetime.today().strftime(time_format)
 
-
-    for header,value in h.items():
-        print(header + ' => ' + value)
-
     print('>  Request type:  {}'.format(r))
 
     if r != '':
         method = r.split(' ')[0]
+        print(method)
         path = r.split(' ')[1]
     else:
         method = 'GET'
@@ -50,7 +47,7 @@ def get_response(req):
         path = path + 'index.html'
 
     fullpath = wwwroot + path
-    print('>  Requested path: ' + fullpath)
+    print('>  Requested path: www' + path)
 
     if method in allowed_methods:
         try:
@@ -69,7 +66,10 @@ def get_response(req):
 
                 # Check for 'if-modified-since' header
                 if 'if-modified-since' in h:
-                    check_date = datetime.datetime.strptime(h['if-modified-since'], req_time_format)
+                    try:
+                        check_date = datetime.datetime.strptime(h['if-modified-since'], req_time_format)
+                    except ValueError:
+                        check_date = datetime.datetime.strptime(h['if-modified-since'], time_format)
 
                     # Check if file has changed
                     if ((check_date - modify_date) > datetime.timedelta(seconds=0)):
@@ -97,11 +97,12 @@ def get_response(req):
     # If method is not allowed...
     else:
         code = '405 Method Not Allowed'
-        modify_date = check_date
+        modify_date = date
         content_type = allowed_types['html']
         content = ''
 
     # Combine all of the above and return response object
+    print(">  Response code: {}\n".format(code))
     resp = 'HTTP/1.1 {}\nDate: {}\nLast-Modified: {}\nContent-Type: {}\n\n{}'.format(code, date, modify_date, content_type, content)
     # print('\n>  Response to send:\n' + resp)
     return resp
@@ -112,7 +113,7 @@ def main(argv):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', port))
     s.listen(1)
-    print('Listening on port {} for connections...'.format(port))
+    print('Listening on port {} for connections...\n'.format(port))
 
     # Main loop
     while(True):
