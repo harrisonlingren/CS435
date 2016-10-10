@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 import socket
-from socket import error as socket_err
 import sys
 
 def main(argv):
     # port and host
-    host = argv[0]
-    port = int(argv[1])
+    if sys.argv == 1:
+        host = input("Hostname to connect to: ")
+        port = input("Port number: ")
+    else:
+        host = argv[0]
+        port = int(argv[1])
 
     #create an INET, STREAMing socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,13 +20,26 @@ def main(argv):
     try:
         print('\nConnection initiated:\n  %s\nType SMTP headers below, each on a new line:' % s.recv(1024))
         pass
-    except socket_err as e:
+    except socket.error as e:
         print('Error: %s' % e)
         raise
 
     # start message
     line = ''
     msg = ''
+
+    to_email = input("Email to send to: ")
+    to_line = bytes(("%s\n") % to_email)
+    s.send(to_line)
+    print("\n%s" % s.recv(1024))
+
+    from_email input("Email to send from: ")
+    from_line = bytes(("%s\n") % from_email)
+    s.send(from_line)
+    print("\n%s" % s.recv(1024))
+
+    # TODO: finish DATA section
+
 
     while 'QUIT' not in line:
         #print('  line here:')
