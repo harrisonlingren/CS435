@@ -1,60 +1,81 @@
 #!/usr/bin/env python
-import socket
-import sys
+import socket, sys
 
-def main(argv):
+def main():
     # port and host
-    if sys.argv == 1:
+    if len(sys.argv) <= 1:
         host = input("Hostname to connect to: ")
-        port = input("Port number: ")
+        port = int(input("Port number: "))
     else:
-        host = argv[0]
-        port = int(argv[1])
+        host = sys.argv[0]
+        port = int(sys.argv[1])
 
-    #create an INET, STREAMing socket
+    # connect to given host and port
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # now connect to the mail server on port 25
     s.connect((host, port))
 
-    # initiate handshake
+    # connect
     try:
-        print('\nConnection initiated:\n  %s\nType SMTP headers below, each on a new line:' % s.recv(1024))
+        print('\nConnection initiated:\n  %s\n' % s.recv(1024).decode('UTF-8'))
         pass
     except socket.error as e:
         print('Error: %s' % e)
         raise
 
-    # start message
-    line = ''
-    msg = ''
 
-    to_email = input("Email to send to: ")
-    to_line = bytes(("%s\n") % to_email)
-    s.send(to_line)
-    print("\n%s" % s.recv(1024))
+    # send handshake
+    domain_line = "HELO %s\n" % input("Domain to send from: ")
+    s.send(domain_line.encode())
 
-    from_email input("Email to send from: ")
-    from_line = bytes(("%s\n") % from_email)
-    s.send(from_line)
-    print("\n%s" % s.recv(1024))
+    from_email = input("Email to send from:  ")
+    from_line = ("MAIL from: %s\n") % from_email
+    to_email = input("Email to send to:    ")
+    to_line = ("RCPT to: %s\n") % to_email
 
-    # TODO: finish DATA section
+    s.send(from_line.encode())
+    s.send(to_line.encode())
 
 
-    while 'QUIT' not in line:
-        #print('  line here:')
-        line = raw_input('  >  ')
-        msg = line + '\n'
+    # start message data
+    print("Message data:")
+    subject_line = ("Subject: %s\n" % input("  Subject: "))
 
-        s.send(msg.encode())
-        print('  ' + str( s.recv(1024) ))
+    print("  Body:")
+    message = []
+    go = True
+    while go:
+        message_line = input("    > ")
+        message.append(message_line)
+        if message_line == "":
+            message_line = input("    > ")
+            if message_line == "":
+                go = False
+                message.pop()
+            else:
+                message.append(message_line)
 
-        if 'DATA' in line:
-            while line != '.':
-                nextLine = raw_input('  >  ') + '\n'
-                s.send(nextLine)
-            s.send(('\n.\n').encode())
-            print('  ' + str( s.recv(1024) ))
+    from_line2 = ("From: %s\n" % from_email)
+    to_line2 = ("To: %s\n" % to_email)
+
+
+    # send DATA initializer, construct data from user input
+    print("Starting data transfer...")
+    s.send(("DATA\n").encode())
+
+    # construct final list of commands
+    msg_headers = ""
+    msg_data = ""
+
+    msg_headers = (subject_line + from_line2 + to_line2)
+    for line in message:
+        msg_data += (line + "\n")
+    msg_data += ".\n"
+
+    msg = msg_headers + msg_data
+
+    # send all message data
+    s.send((msg).encode())
+    print("%s" % s.recv(1024).decode('UTF-8'))
 
     print('Closing connection...')
 
@@ -63,8 +84,4 @@ def main(argv):
     s.close()
 
 if __name__ == '__main__':
-    # pass arguments if any exist, otherwise send some defaults (not complete)
-    if len(sys.argv) > 1:
-        main(sys.argv[1:])
-    else:
-        main( ['bumail.butler.edu', 25] )
+    main()
