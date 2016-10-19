@@ -19,9 +19,9 @@ def get_response(req):
         method = r.split(' ')[0]
         print(method)
 
-
     # Parse request and form response here
     # aka do_game()
+    # going to make a game module with necessary stuff
     response_code = 000
 
 
