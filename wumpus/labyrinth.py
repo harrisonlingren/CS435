@@ -10,6 +10,9 @@ class room(object):
         self.name = attrs['name']
         self.hazard = False
 
+    def getAdj(self):
+        return self.adjacent
+
 
 class labyrinth(object):
     ''' A class for the game maze '''
@@ -24,8 +27,8 @@ class labyrinth(object):
         for r in rooms_dict['rooms']:
             #print("{}".format(r)
             rm = room(r)
-            self.rooms[rm.rid] = room(r)    
+            self.rooms[rm.rid] = room(r)
 
     def print(self):
         for k, r in self.rooms.items():
-            print("{}: {}".format(r.name, r.adjacent))
+            print("{}: {}".format(r.rid, r.adjacent))
